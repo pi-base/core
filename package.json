@@ -1,0 +1,22 @@
+{
+  "name": "pi-base-core",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pi-base/core.git"
+  },
+  "author": "James Dabbs",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pi-base/core/issues"
+  },
+  "homepage": "https://github.com/pi-base/core#readme",
+  "dependencies": {
+    "showdown": "^1.6.4"
+  }
+}
