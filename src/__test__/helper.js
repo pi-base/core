@@ -47,7 +47,7 @@ const hydrate = (state) => {
   })
 }
 
-export const state = hydrate(I.Map({
+const state = hydrate(I.Map({
   spaces: index(u, 'spaces'),
   'spaces.finder': new Finder(u.get('spaces')),
   properties: index(u, 'properties'),
@@ -60,3 +60,7 @@ export const state = hydrate(I.Map({
   ),
   proofs: u.get('proofs')
 }))
+
+module.exports = {
+  state: state
+}

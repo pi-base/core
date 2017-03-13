@@ -5,7 +5,7 @@ import * as F from './formula'
 import * as Q from './queries'
 
 const GIVEN = 'GIVEN'
-export const TAUTOLOGY = 'TAUTOLOGY'
+const TAUTOLOGY = 'TAUTOLOGY'
 
 const trace = (x) => {
   // console.log(x)
@@ -170,7 +170,7 @@ const tryDisprove = (state, formula) => {
   }
 }
 
-export const disprove = (state, formula) => {
+const disprove = (state, formula) => {
   trace(D.formula(state, formula))
   try {
     tryDisprove(state, formula)
@@ -181,9 +181,15 @@ export const disprove = (state, formula) => {
   }
 }
 
-export const proveConverse = (state, theorem) => {
+const proveConverse = (state, theorem) => {
   return disprove(state, F.and(
     theorem.get('if').negate(),
     theorem.get('then')
   ))
+}
+
+module.exports = {
+  TAUTOLOGY: TAUTOLOGY,
+  disprove: disprove,
+  proveConverse: proveConverse
 }

@@ -12,7 +12,7 @@ const getFragment = (str='') => {
   return parts[parts.length - 1].trim()
 }
 
-export const replaceFragment = (q, expanded) => {
+const replaceFragment = (q, expanded) => {
   if (!q) {
     return ''
   }
@@ -34,20 +34,13 @@ const all = (coll, key) => {
   }
 }
 
-export const allSpaces = all('spaces')
-export const allProperties = all('properties')
-export const allTheorems = all('theorems')
+const allSpaces = all('spaces')
+const allProperties = all('properties')
+const allTheorems = all('theorems')
 
-export const findSpace = (state, uid) => state.getIn(['spaces', uid])
-export const findProperty = (state, uid) => state.getIn(['properties', uid])
-
-const fetchTheorem = (state) => {
-  return (id) => {
-    return state.getIn(['theorems', id])
-  }
-}
-
-export const findTheorem = (state, id) => fetchTheorem(state)(id)
+const findSpace = (state, uid) => state.getIn(['spaces', uid])
+const findProperty = (state, uid) => state.getIn(['properties', uid])
+const findTheorem = (state, id) => (state.getIn(['theorems', id]))
 
 const findTraitId = (state, id) => {
   const t = state.getIn(['traits', id])
@@ -74,7 +67,7 @@ const findTraitSP = (state, spaceId, propertyId) => {
   })
 }
 
-export const findTrait = (state, id, pid) => {
+const findTrait = (state, id, pid) => {
   if (id[0] === 'T') {
     return findTraitId(state, id)
   } else {
@@ -84,7 +77,7 @@ export const findTrait = (state, id, pid) => {
 
 // Filtration
 
-export const filterByText = (state, {
+const filterByText = (state, {
   text,
   spaces
 }) => {
@@ -99,7 +92,7 @@ export const filterByText = (state, {
   return I.OrderedMap(matches.map(uid => [uid, spaces.get(uid)]))
 }
 
-export const filterByFormula = (state, {
+const filterByFormula = (state, {
   formula,
   spaces
 }) => {
@@ -113,7 +106,7 @@ export const filterByFormula = (state, {
   })
 }
 
-export const filter = (state, {
+const filter = (state, {
   text,
   formula,
   spaces
@@ -135,7 +128,7 @@ export const filter = (state, {
 
 // Other exports
 
-export const parseFormula = (state, q) => {
+const parseFormula = (state, q) => {
   const parsed = F.parse(q)
   if (!parsed) {
     return
@@ -164,7 +157,7 @@ const searchByFormula = (state, formula, value = true) => {
   }).keySeq()
 }
 
-export const suggestionsFor = (state, query, limit) => {
+const suggestionsFor = (state, query, limit) => {
   if (!query) {
     return I.List([])
   }
@@ -173,7 +166,7 @@ export const suggestionsFor = (state, query, limit) => {
   return finder.suggestionsFor(getFragment(query), limit)
 }
 
-export const spaceTraits = (state, space) => {
+const spaceTraits = (state, space) => {
   const traits = state.getIn(['traitTable', space.get('uid')])
   if (!traits) {
     return I.List([])
@@ -185,23 +178,23 @@ export const spaceTraits = (state, space) => {
   })).sortBy((t, _id) => t.getIn(['property', 'name'])).toList()
 }
 
-export const getProof = (state, trait) => {
+const getProof = (state, trait) => {
   const proof = state.getIn(['proofs', trait.get('uid')])
 
   if (!proof) {
     return
   }
   return I.Map({
-    theorems: proof.get('0').map(fetchTheorem(state)),
+    theorems: proof.get('0').map((id) => findTheorem(state, id)),
     traits: proof.get('1').map((id) => findTrait(state, id))
   })
 }
 
-export const hasProof = (state, trait) => {
+const hasProof = (state, trait) => {
   return state.hasIn(['proofs', trait.get('uid')])
 }
 
-export const counterexamples = (state, theorem) => {
+const counterexamples = (state, theorem) => {
   const f = F.and(
     theorem.get('if').negate(),
     theorem.get('then')
@@ -210,14 +203,36 @@ export const counterexamples = (state, theorem) => {
   return searchByFormula(state, f).map(id => state.getIn(['spaces', id]))
 }
 
-export const theoremProperties = (t) => {
+const theoremProperties = (t) => {
   return t.get('if').properties().union(
     t.get('then').properties()
   )
 }
 
-export const relatedTheorems = (state, prop) => {
+const relatedTheorems = (state, prop) => {
   return allTheorems(state).filter(t => {
     return theoremProperties(t).includes(prop)
   }).valueSeq().toList()
+}
+
+module.exports = {
+  allSpaces,
+  allProperties,
+  allTheorems,
+  findSpace,
+  findProperty,
+  findTrait,
+  findTheorem,
+  filterByText,
+  filterByFormula,
+  filter,
+  counterexamples,
+  hasProof,
+  getProof,
+  replaceFragment,
+  relatedTheorems,
+  theoremProperties,
+  spaceTraits,
+  suggestionsFor,
+  parseFormula
 }

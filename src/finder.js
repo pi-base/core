@@ -38,4 +38,4 @@ class Finder {
   }
 }
 
-export default Finder
+module.exports = Finder
