@@ -36,7 +36,11 @@ function pibase(this: any) {
   const parser = this.Parser.prototype
 
   parser.inlineTokenizers.citation = delimitedParser('citation', '{{', '}}')
-  parser.inlineTokenizers.internalLink = delimitedParser('internalLink', '{', '}')
+  parser.inlineTokenizers.internalLink = delimitedParser(
+    'internalLink',
+    '{',
+    '}'
+  )
   parser.inlineTokenizers.inlineMathDollars = delimitedParser(
     'inlineMath',
     '$',
@@ -60,29 +64,29 @@ function pibase(this: any) {
   )
 
   const transformer = (tree: any) => {
-    visit(tree, 'citation', node => {
+    visit(tree, 'citation', (node) => {
       node.data = {
         hName: 'citation',
         hProperties: {
-          citation: node.citation
-        }
+          citation: node.citation,
+        },
       }
     })
-    visit(tree, 'inlineMath', node => {
+    visit(tree, 'inlineMath', (node) => {
       node.data = {
         hName: 'inlineMath',
         hProperties: {
           inline: true,
-          formula: node.inlineMath
-        }
+          formula: node.inlineMath,
+        },
       }
     })
-    visit(tree, 'internalLink', node => {
+    visit(tree, 'internalLink', (node) => {
       node.data = {
         hName: 'internalLink',
         hProperties: {
-          to: node.internalLink
-        }
+          to: node.internalLink,
+        },
       }
     })
   }
@@ -90,7 +94,4 @@ function pibase(this: any) {
   return transformer
 }
 
-export default () =>
-  remark()
-    .use(pibase)
-    .use(remark2rehype)
+export default () => remark().use(pibase).use(remark2rehype)

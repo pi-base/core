@@ -34,17 +34,17 @@ export function serialize(bundle: Bundle): Serialized {
     spaces: Array.from(bundle.spaces.values()),
     theorems: Array.from(bundle.theorems.values()),
     traits: Array.from(bundle.traits.values()),
-    version: bundle.version
+    version: bundle.version,
   }
 }
 
 export function deserialize(serialized: Serialized): Bundle {
   return {
-    properties: indexBy(serialized.properties, p => p.uid),
-    spaces: indexBy(serialized.spaces, s => s.uid),
-    theorems: indexBy(serialized.theorems, t => t.uid),
+    properties: indexBy(serialized.properties, (p) => p.uid),
+    spaces: indexBy(serialized.spaces, (s) => s.uid),
+    theorems: indexBy(serialized.theorems, (t) => t.uid),
     traits: indexBy(serialized.traits, traitId),
-    version: serialized.version
+    version: serialized.version,
   }
 }
 
@@ -65,7 +65,10 @@ export async function fetch(
   if (opts.etag) {
     headers.append('If-None-Match', opts.etag)
   }
-  const response = await window.fetch(bundleUrl(opts), { method: 'GET', headers })
+  const response = await window.fetch(bundleUrl(opts), {
+    method: 'GET',
+    headers,
+  })
   if (response.status === 304) {
     return
   }
@@ -79,7 +82,7 @@ export async function fetch(
 
   return {
     bundle: deserialized,
-    etag: response.headers.get('etag') || ''
+    etag: response.headers.get('etag') || '',
   }
 }
 
@@ -130,7 +133,7 @@ export function check(
       value,
       proof,
       description: '',
-      refs: []
+      refs: [],
     }
     newTraits.set(uid, trait)
   })
@@ -141,8 +144,8 @@ export function check(
       ...bundle,
       traits: new Map([
         ...Array.from(bundle.traits.entries()),
-        ...Array.from(newTraits.entries())
-      ])
-    }
+        ...Array.from(newTraits.entries()),
+      ]),
+    },
   }
 }
