@@ -1,114 +1,241 @@
-import * as F from '../Formula'
-import { union } from '../Util'
-
+import {
+  And,
+  Atom,
+  Formula,
+  Or,
+  evaluate,
+  negate,
+  properties,
+} from '../Formula'
 import ImplicationIndex from './ImplicationIndex'
 import Queue from './Queue'
-import { Evidence, Formula, Id, Implication, Proof } from './Types'
+import { Id, Implication } from './Types'
 
-export default class Prover<T extends Implication> {
-  traits: Map<Id, boolean>
+// TODO: is it deduction, or derivation
 
-  private proofs: Map<Id, Evidence>
-  private queue: Queue<T>
+type Evidence<TheoremId = Id, PropertyId = Id> = [TheoremId, PropertyId[]]
+type Proof<TheoremId = Id, PropertyId = Id> = {
+  theorems: TheoremId[]
+  properties: PropertyId[]
+}
+export type Contradiction<TheoremId = Id, PropertyId = Id> = Proof<
+  TheoremId,
+  PropertyId
+>
+export type Derivation<TheoremId = Id, PropertyId = Id> = {
+  property: PropertyId
+  value: boolean
+  proof: Proof<TheoremId, PropertyId>
+}
+type Result<TheoremId = Id, PropertyId = Id> =
+  | {
+      kind: 'contradiction'
+      contradiction: Contradiction<TheoremId, PropertyId>
+    }
+  | { kind: 'derivations'; derivations: Derivation<TheoremId, PropertyId>[] }
 
-  static build(implications: Implication[], traits: [string, boolean][]) {
-    return new Prover(
-      new ImplicationIndex(implications),
-      new Map(traits)
-    )
+// Given a collection of implications and a collection of traits for an object,
+// find either the collection of derivable traits, or a contradiction
+export function deduceTraits<TheoremId = Id, PropertyId = Id>(
+  implications: ImplicationIndex<TheoremId, PropertyId>,
+  traits: Map<PropertyId, boolean>
+): Result<TheoremId, PropertyId> {
+  return new Prover(implications, traits).run()
+}
+
+// Given a collection of implications and a candidate formula,
+// return a proof of why the formula is unsatisfiable, if possible
+//
+// The current proof strategy is to force the formula and then look for a
+// a contradiction. Note that this does not find all possible proofs - e.g. when
+// the formula is a disjunction, `force(a | b)` does not actually force anything.
+export function disproveFormula<TheoremId = Id, PropertyId = Id>(
+  implications: ImplicationIndex<TheoremId, PropertyId>,
+  formula: Formula<PropertyId>
+): TheoremId[] | 'tautology' | undefined {
+  const prover = new Prover<TheoremId | 'given', PropertyId>(implications)
+
+  const contradiction = prover.force('given', formula)
+  if (contradiction) {
+    return formatProof(contradiction)
   }
 
-  constructor(implications: ImplicationIndex<T>, traits: Map<Id, boolean> = new Map()) {
-    this.traits = traits
+  const result = prover.run()
+  if (result.kind === 'contradiction') {
+    return formatProof(result.contradiction)
+  }
+}
 
-    this.proofs = new Map()
+// Given a collection of implications and a candidate implication,
+// attempt to derive a proof of the candidate
+export function proveTheorem<TheoremId = Id, PropertyId = Id>(
+  theorems: ImplicationIndex<TheoremId, PropertyId>,
+  when: Formula<PropertyId>,
+  then: Formula<PropertyId>
+): TheoremId[] | 'tautology' | undefined {
+  // We don't want to `disproveFormula(when + ~then)` given the current
+  // limitations of `disproveFormula` above. Instead we:
+  //
+  // * force `then`
+  // * run deductions
+  // * force `~when`
+  // * run deductions
+  //
+  // Note that this still has edges, e.g.
+  // * `A | B => C` doesn't circle back to assert `then`
+  // * `A | B => C + D` can't get started at all
+  let contradiction: Contradiction<TheoremId | 'given', PropertyId> | undefined
+  let result: Result<TheoremId | 'given', PropertyId>
+
+  const prover = new Prover<TheoremId | 'given', PropertyId>(theorems)
+  contradiction = prover.force('given', when)
+  if (contradiction) {
+    return formatProof(contradiction)
+  }
+
+  result = prover.run()
+  if (result.kind === 'contradiction') {
+    return formatProof(result.contradiction)
+  }
+
+  contradiction = prover.force('given', negate(then))
+  if (contradiction) {
+    return formatProof(contradiction)
+  }
+
+  result = prover.run()
+  if (result.kind === 'contradiction') {
+    return formatProof(result.contradiction)
+  }
+}
+
+class Prover<
+  TheoremId = Id,
+  PropertyId = Id,
+  Theorem extends Implication<TheoremId, PropertyId> = Implication<
+    TheoremId,
+    PropertyId
+  >
+> {
+  private traits: Map<PropertyId, boolean>
+
+  private given: Set<PropertyId>
+  private evidence: Map<PropertyId, Evidence<TheoremId, PropertyId>>
+  private queue: Queue<TheoremId, PropertyId, Theorem>
+
+  constructor(
+    implications: ImplicationIndex<TheoremId, PropertyId, Theorem>,
+    traits: Map<PropertyId, boolean> = new Map()
+  ) {
+    this.traits = traits
+    this.given = new Set([...traits.keys()])
+    this.evidence = new Map()
     this.queue = new Queue(implications)
 
-    traits.forEach((_: boolean, id: Id) => {
-      this.proofs.set(id, 'given')
+    traits.forEach((_: boolean, id: PropertyId) => {
       this.queue.mark(id)
     })
   }
 
-  apply(implication: Implication): Proof | undefined {
-    const a = implication.when
-    const c = implication.then
-    const av = F.evaluate(a, this.traits)
-    const cv = F.evaluate(c, this.traits)
-
-    if (av === true && cv === false) {
-      return this.contradiction(implication.uid, union(F.properties(a), F.properties(c)))
-    } else if (av === true) {
-      return this.force(implication.uid, c, F.properties(a))
-    } else if (cv === false) {
-      return this.force(implication.uid, F.negate(a), F.properties(c))
-    }
-  }
-
-  run(): Proof | undefined {
+  run(): Result<TheoremId, PropertyId> {
     let theorem
-    while (theorem = this.queue.shift()) {
+    while ((theorem = this.queue.shift())) {
       const contradiction = this.apply(theorem)
-      if (contradiction) { return contradiction }
+      if (contradiction) {
+        return { kind: 'contradiction', contradiction }
+      }
     }
-  }
 
-  derivations() {
-    const contradiction = this.run()
-    if (contradiction) { return { contradiction } }
-
-    const proofs: { property: string, value: boolean, proof: Proof }[] = []
-    this.traits.forEach((value: boolean, property: string) => {
+    const derivations: Derivation<TheoremId, PropertyId>[] = []
+    this.traits.forEach((value: boolean, property: PropertyId) => {
       const proof = this.proof(property)
-      if (!proof || proof === 'given') { return }
+      if (!proof || proof === 'given') {
+        return
+      }
 
-      proofs.push({ property, value, proof })
+      derivations.push({ property, value, proof })
     })
 
-    return { proofs }
+    return { kind: 'derivations', derivations }
   }
 
-  proof(property: Id) {
-    const proof = this.proofs.get(property)
-    switch (proof) {
-      case 'given': return 'given'
-      case undefined: return undefined
-      default: return this.expand(proof.theorem, proof.properties)
+  proof(
+    property: PropertyId
+  ): Proof<TheoremId, PropertyId> | 'given' | undefined {
+    if (this.given.has(property)) {
+      return 'given'
+    }
+
+    const evidence = this.evidence.get(property)
+    return evidence ? this.expand(evidence) : undefined
+  }
+
+  private apply(
+    implication: Theorem
+  ): Contradiction<TheoremId, PropertyId> | undefined {
+    const a = implication.when
+    const c = implication.then
+    const av = evaluate(a, this.traits)
+    const cv = evaluate(c, this.traits)
+
+    if (av === true && cv === false) {
+      return this.contradiction(implication.id, [
+        ...properties(a),
+        ...properties(c),
+      ])
+    } else if (av === true) {
+      return this.force(implication.id, c, [...properties(a)])
+    } else if (cv === false) {
+      return this.force(implication.id, negate(a), [...properties(c)])
     }
   }
 
-  private contradiction(theorem: Id, properties: Set<Id>) {
-    return this.expand(theorem, Array.from(properties))
+  private contradiction(
+    theorem: TheoremId,
+    properties: PropertyId[]
+  ): Contradiction<TheoremId, PropertyId> {
+    return this.expand([theorem, properties])
   }
 
-  private expand(theorem: Id, properties: Id[]) {
-    let theoremByProperty = new Map<Id, Id>()
-    let assumptions = new Set<Id>()
-    let queue = Array.from(properties)
-    let expanded = new Set<Id>()
+  private expand([theorem, properties]: Evidence<TheoremId, PropertyId>): Proof<
+    TheoremId,
+    PropertyId
+  > {
+    const theoremByProperty = new Map<PropertyId, TheoremId>()
+    const assumptions = new Set<PropertyId>()
+    const expanded = new Set<PropertyId>()
 
+    let queue = [...properties]
     let property
-    while (property = queue.shift()) {
-      if (expanded.has(property)) { continue }
+    while ((property = queue.shift())) {
+      if (expanded.has(property)) {
+        continue
+      }
 
-      const proof = this.proofs.get(property)
-      if (proof === 'given' || (proof && proof.theorem === 'given')) {
-        expanded.add(property)
+      if (this.given.has(property)) {
         assumptions.add(property)
-      } else if (proof) {
-        theoremByProperty.set(property, proof.theorem)
         expanded.add(property)
-        queue = queue.concat(proof.properties)
+      } else {
+        const evidence = this.evidence.get(property)
+        if (evidence) {
+          theoremByProperty.set(property, evidence[0])
+          queue = queue.concat(evidence[1])
+          expanded.add(property)
+        }
       }
     }
 
     return {
-      theorems: Array.from(theoremByProperty.values()).concat(theorem),
-      properties: Array.from(assumptions)
+      theorems: [theorem, ...theoremByProperty.values()],
+      properties: [...assumptions],
     }
   }
 
-  force(theorem: Id, formula: Formula, support: Set<Id>): Proof | undefined {
+  force(
+    theorem: TheoremId,
+    formula: Formula<PropertyId>,
+    support: PropertyId[] = []
+  ): Contradiction<TheoremId, PropertyId> | undefined {
     switch (formula.kind) {
       case 'and':
         return this.forceAnd(theorem, formula, support)
@@ -119,41 +246,59 @@ export default class Prover<T extends Implication> {
     }
   }
 
-  private forceAtom(theorem: Id, formula: F.Atom<Id>, support: Set<Id>) {
+  private forceAtom(
+    theorem: TheoremId,
+    formula: Atom<PropertyId>,
+    support: PropertyId[]
+  ): Contradiction<TheoremId, PropertyId> | undefined {
     const property = formula.property
 
     if (this.traits.has(property)) {
       if (this.traits.get(property) !== formula.value) {
-        return this.contradiction(theorem, new Set(property))
+        return this.contradiction(theorem, [property])
       } else {
         return
       }
     }
 
     this.traits.set(property, formula.value)
-    this.proofs.set(property, {
-      theorem,
-      properties: Array.from(support)
-    })
+    this.evidence.set(property, [theorem, support])
     this.queue.mark(property)
   }
 
-  private forceAnd(theorem: Id, formula: F.And<Id>, support: Set<Id>) {
+  private forceAnd(
+    theorem: TheoremId,
+    formula: And<PropertyId>,
+    support: PropertyId[]
+  ): Contradiction<TheoremId, PropertyId> | undefined {
     for (const sub of formula.subs) {
       const contradiction = this.force(theorem, sub, support)
-      if (contradiction) { return contradiction }
+      if (contradiction) {
+        return contradiction
+      }
     }
   }
 
-  private forceOr(theorem: Id, formula: F.Or<Id>, support: Set<Id>) {
+  private forceOr(
+    theorem: TheoremId,
+    formula: Or<PropertyId>,
+    support: PropertyId[]
+  ): Contradiction<TheoremId, PropertyId> | undefined {
     const result = formula.subs.reduce(
       (
-        acc: { falses: Formula[], unknown: Formula | undefined } | undefined,
-        sf: Formula
+        acc:
+          | {
+              falses: Formula<PropertyId>[]
+              unknown: Formula<PropertyId> | undefined
+            }
+          | undefined,
+        sf: Formula<PropertyId>
       ) => {
-        if (!acc) { return undefined }
+        if (!acc) {
+          return undefined
+        }
 
-        const value = F.evaluate(sf, this.traits)
+        const value = evaluate(sf, this.traits)
         if (value === true) {
           return undefined // Can't force anything
         } else if (value === false) {
@@ -165,40 +310,32 @@ export default class Prover<T extends Implication> {
         }
         return acc
       },
-      { falses: Array<Formula>(), unknown: undefined }
+      { falses: Array<Formula<PropertyId>>(), unknown: undefined }
     )
 
     if (!result) return
 
-    const falseProps = union<Id>(...result.falses.map(F.properties))
+    const falseProps = result.falses.reduce<PropertyId[]>(
+      (acc, f) => acc.concat([...properties(f)]),
+      []
+    )
 
     if (result.falses.length === formula.subs.length) {
       return this.contradiction(theorem, falseProps)
     } else if (result.unknown) {
-      return this.force(theorem, result.unknown, union(support, falseProps))
+      return this.force(theorem, result.unknown, [...support, ...falseProps])
     }
   }
 }
 
-export function disprove<T extends Implication>(implications: ImplicationIndex<T>, formula: Formula): Id[] | 'tautology' | undefined {
-  let proof
-  const prover = new Prover(implications)
-
-  proof = prover.force('given', formula, new Set())
-  if (proof) { return formatProof(proof) }
-
-  proof = prover.run()
-  if (proof) { return formatProof(proof) }
-}
-
-export function prove(theorems: Implication[], when: Formula, then: Formula): Id[] | 'tautology' | undefined {
-  return disprove(
-    new ImplicationIndex(theorems),
-    F.and(when, F.negate(then))
-  )
-}
-
-const formatProof = (proof: Proof) => {
-  const filtered = proof.theorems.filter(id => id !== 'given')
+function formatProof<TheoremId, PropertyId>(
+  proof: Proof<TheoremId | 'given', PropertyId>
+): TheoremId[] | 'tautology' {
+  const filtered: TheoremId[] = []
+  proof.theorems.forEach((id: TheoremId | 'given') => {
+    if (id !== 'given') {
+      filtered.push(id)
+    }
+  })
   return filtered.length > 0 ? filtered : 'tautology'
 }

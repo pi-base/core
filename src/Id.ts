@@ -11,19 +11,19 @@ export type SpaceId = { kind: 'space'; id: number }
 export type PropertyId = { kind: 'property'; id: number }
 export type TheoremId = { kind: 'theorem'; id: number }
 
-const prefix = /^\w0*/
 const pattern = /^(?<prefix>[spti])0*(?<id>\d+)/i
 
-export function traitId({ space, property }: TraitId) {
+export function traitId({ space, property }: TraitId): string {
   return `${space}|${property}`
 }
 
-export function expand(prefix: string, number: number) {
+export function format(prefix: string, number: number): string {
   return `${prefix}${number.toString().padStart(6, '0')}`
 }
 
-export function trim(id: string) {
-  return id.replace(prefix, '')
+export function trim(id: string): string {
+  const match = id.match(pattern)
+  return match?.groups ? match.groups.id : ''
 }
 
 export function tag(input: string): Tagged | null {
@@ -44,4 +44,13 @@ export function tag(input: string): Tagged | null {
     default:
       return null
   }
+}
+
+export function toInt(id: string): number {
+  const tagged = tag(id)
+  if (tagged === null || tagged.kind === 'trait') {
+    return 0
+  } // TODO: return undefined
+
+  return tagged.id
 }
