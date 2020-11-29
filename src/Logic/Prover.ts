@@ -174,6 +174,7 @@ class Prover<
         return
       }
 
+      // this.derivations.add({ property, value, proof })
       derivations.push({ property, value, proof })
     })
 
