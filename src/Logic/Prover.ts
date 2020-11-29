@@ -175,6 +175,17 @@ class Derivations<TheoremId, PropertyId> {
       properties: [...assumptions],
     }
   }
+
+  proof(
+    property: PropertyId
+  ): Proof<TheoremId, PropertyId> | 'given' | undefined {
+    if (this.given.has(property)) {
+      return 'given'
+    }
+
+    const evidence = this.getEvidence(property)
+    return evidence ? this.expand(evidence) : undefined
+  }
 }
 
 class Prover<
