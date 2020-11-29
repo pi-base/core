@@ -279,42 +279,6 @@ class Prover<
     return this.derivations.expand([theorem, properties])
   }
 
-  // This seems to be a concern of the Derivations class, and we'd really like
-  // to move it. We can't quite though, because of
-  private expand([theorem, properties]: Evidence<TheoremId, PropertyId>): Proof<
-    TheoremId,
-    PropertyId
-  > {
-    const theoremByProperty = new Map<PropertyId, TheoremId>()
-    const assumptions = new Set<PropertyId>()
-    const expanded = new Set<PropertyId>()
-
-    let queue = [...properties]
-    let property
-    while ((property = queue.shift())) {
-      if (expanded.has(property)) {
-        continue
-      }
-
-      if (this.given.has(property)) { // <-- this reference to other state
-        assumptions.add(property)
-        expanded.add(property)
-      } else {
-        const evidence = this.derivations.getEvidence(property)
-        if (evidence) {
-          theoremByProperty.set(property, evidence[0])
-          queue = queue.concat(evidence[1])
-          expanded.add(property)
-        }
-      }
-    }
-
-    return {
-      theorems: [theorem, ...theoremByProperty.values()],
-      properties: [...assumptions],
-    }
-  }
-
   force(
     theorem: TheoremId,
     formula: Formula<PropertyId>,
