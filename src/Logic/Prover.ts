@@ -275,7 +275,7 @@ class Prover<
       this.derivations.add({ property, value, proof })
     })
 
-    return { kind: 'derivations', derivations: this.derivations.all() }
+    return { kind: 'derivations', derivations: this.derivations.all(this.traits) }
   }
 
   private apply(
