@@ -110,7 +110,10 @@ export function proveTheorem<TheoremId = Id, PropertyId = Id>(
 }
 
 class Derivations<TheoremId, PropertyId> {
+  private derivations: Map<PropertyId, [boolean, Proof<TheoremId, PropertyId>]>
+
   constructor() {
+    this.derivations = new Map()
   }
 
   add(_: {
