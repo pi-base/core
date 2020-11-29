@@ -29,9 +29,9 @@ export type Derivation<TheoremId = Id, PropertyId = Id> = {
 }
 type Result<TheoremId = Id, PropertyId = Id> =
   | {
-      kind: 'contradiction'
-      contradiction: Contradiction<TheoremId, PropertyId>
-    }
+    kind: 'contradiction'
+    contradiction: Contradiction<TheoremId, PropertyId>
+  }
   | { kind: 'derivations'; derivations: Derivation<TheoremId, PropertyId>[] }
 
 // Given a collection of implications and a collection of traits for an object,
@@ -116,7 +116,7 @@ class Prover<
     TheoremId,
     PropertyId
   >
-> {
+  > {
   private traits: Map<PropertyId, boolean>
 
   private given: Set<PropertyId>
@@ -288,9 +288,9 @@ class Prover<
       (
         acc:
           | {
-              falses: Formula<PropertyId>[]
-              unknown: Formula<PropertyId> | undefined
-            }
+            falses: Formula<PropertyId>[]
+            unknown: Formula<PropertyId> | undefined
+          }
           | undefined,
         sf: Formula<PropertyId>
       ) => {
