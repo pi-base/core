@@ -153,7 +153,6 @@ class Prover<
   private derivations: Derivations<TheoremId, PropertyId>
 
   private given: Set<PropertyId>
-  private evidence: Map<PropertyId, Evidence<TheoremId, PropertyId>>
   private queue: Queue<TheoremId, PropertyId, Theorem>
 
   constructor(
@@ -163,7 +162,6 @@ class Prover<
     this.traits = traits
     this.derivations = new Derivations()
     this.given = new Set([...traits.keys()])
-    this.evidence = new Map()
     this.queue = new Queue(implications)
 
     traits.forEach((_: boolean, id: PropertyId) => {
