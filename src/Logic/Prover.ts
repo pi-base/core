@@ -304,7 +304,7 @@ class Prover<
     }
 
     this.traits.set(property, formula.value)
-    // this.derivations.addEvidence(property, theorem, support)
+    this.derivations.addEvidence(property, theorem, support)
     this.evidence.set(property, [theorem, support])
     this.queue.mark(property)
   }
