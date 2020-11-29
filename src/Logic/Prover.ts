@@ -127,7 +127,7 @@ class Derivations<TheoremId, PropertyId> {
   }
 
   addEvidence(property: PropertyId, theorem: TheoremId, support: PropertyId[]) {
-
+    this.evidence.set(property, [theorem, support])
   }
 
   all(): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
