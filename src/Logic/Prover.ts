@@ -264,7 +264,7 @@ class Prover<
         assumptions.add(property)
         expanded.add(property)
       } else {
-        const evidence = this.evidence.get(property)
+        const evidence = this.derivations.getEvidence(property)
         if (evidence) {
           theoremByProperty.set(property, evidence[0])
           queue = queue.concat(evidence[1])
