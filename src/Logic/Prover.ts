@@ -139,20 +139,6 @@ class Derivations<TheoremId, PropertyId> {
   all(
     traits: Map<PropertyId, boolean> = new Map()
   ): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
-    // We should now have enough information stored that we can populate this
-    // list directly from `evidence` rather than relying on something external
-    // populating `derivations`.
-    //
-    // Our next goal is to adapt this existing logic from `Prover#run`:
-    //
-    //   this.traits.forEach((value: boolean, property: PropertyId) => {
-    //     const proof = this.derivations.proof(property)
-    //     if (!proof || proof === 'given') {
-    //       return
-    //     }
-
-    //     this.derivations.add({ property, value, proof })
-    //   })
     const result: { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] = []
     traits.forEach((value: boolean, property: PropertyId) => {
       const proof = this.proof(property)
