@@ -114,7 +114,7 @@ class Derivations<TheoremId, PropertyId> {
   private evidence: Map<PropertyId, Evidence<TheoremId, PropertyId>>
   private given: Set<PropertyId>
 
-  constructor(assumptions: PropertyId[] = []) {
+  constructor(assumptions: PropertyId[]) {
     this.derivations = new Map()
     this.evidence = new Map()
     this.given = new Set(assumptions)
