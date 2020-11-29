@@ -163,9 +163,7 @@ class Derivations<TheoremId, PropertyId> {
       result.push({ property, value, proof })
     })
 
-    return [...this.derivations.entries()].map(
-      ([property, [value, proof]]) => ({ property, value, proof })
-    )
+    return result
   }
 
   expand([theorem, properties]: Evidence<TheoremId, PropertyId>): Proof<
