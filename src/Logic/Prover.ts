@@ -122,6 +122,7 @@ class Prover<
   >
   > {
   private traits: Map<PropertyId, boolean>
+  private derivations: Derivations
 
   private given: Set<PropertyId>
   private evidence: Map<PropertyId, Evidence<TheoremId, PropertyId>>
@@ -132,6 +133,7 @@ class Prover<
     traits: Map<PropertyId, boolean> = new Map()
   ) {
     this.traits = traits
+    this.derivations = new Derivations()
     this.given = new Set([...traits.keys()])
     this.evidence = new Map()
     this.queue = new Queue(implications)
