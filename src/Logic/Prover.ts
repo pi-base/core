@@ -110,6 +110,9 @@ export function proveTheorem<TheoremId = Id, PropertyId = Id>(
 }
 
 class Derivations<TheoremId, PropertyId> {
+  constructor() {
+  }
+
   add(_: {
     property: PropertyId,
     value: boolean,
