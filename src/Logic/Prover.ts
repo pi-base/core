@@ -116,12 +116,12 @@ class Derivations<TheoremId, PropertyId> {
     this.derivations = new Map()
   }
 
-  add(_: {
+  add({ property, value, proof }: {
     property: PropertyId,
     value: boolean,
     proof: Proof<TheoremId, PropertyId>
   }) {
-
+    this.derivations.set(property, [value, proof])
   }
 }
 
