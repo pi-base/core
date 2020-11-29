@@ -123,6 +123,10 @@ class Derivations<TheoremId, PropertyId> {
   }) {
     this.derivations.set(property, [value, proof])
   }
+
+  all(): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
+    return []
+  }
 }
 
 class Prover<
