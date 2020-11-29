@@ -276,7 +276,7 @@ class Prover<
     theorem: TheoremId,
     properties: PropertyId[]
   ): Contradiction<TheoremId, PropertyId> {
-    return this.expand([theorem, properties])
+    return this.derivations.expand([theorem, properties])
   }
 
   // This seems to be a concern of the Derivations class, and we'd really like
