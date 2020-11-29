@@ -153,6 +153,8 @@ class Derivations<TheoremId, PropertyId> {
 
     //     this.derivations.add({ property, value, proof })
     //   })
+    const result: { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] = []
+
     return [...this.derivations.entries()].map(
       ([property, [value, proof]]) => ({ property, value, proof })
     )
