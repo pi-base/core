@@ -124,6 +124,10 @@ class Derivations<TheoremId, PropertyId> {
     this.derivations.set(property, [value, proof])
   }
 
+  addEvidence(property: PropertyId, theorem: TheoremId, support: PropertyId[]) {
+
+  }
+
   all(): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
     return [...this.derivations.entries()].map(
       ([property, [value, proof]]) => ({ property, value, proof })
