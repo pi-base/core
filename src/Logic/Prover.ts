@@ -130,6 +130,10 @@ class Derivations<TheoremId, PropertyId> {
     this.evidence.set(property, [theorem, support])
   }
 
+  getEvidence(property: PropertyId): Evidence<TheoremId, PropertyId> | undefined {
+    return undefined
+  }
+
   all(): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
     return [...this.derivations.entries()].map(
       ([property, [value, proof]]) => ({ property, value, proof })
