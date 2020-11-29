@@ -241,7 +241,7 @@ class Prover<
     // an object that holds on to all of the supporting proof metadata, and can
     // expand that out to full proofs on demand.
     this.traits.forEach((value: boolean, property: PropertyId) => {
-      const proof = this.proof(property)
+      const proof = this.derivations.proof(property)
       if (!proof || proof === 'given') {
         return
       }
