@@ -185,7 +185,6 @@ class Prover<
     // Instead of always unconditionally expanding proofs, we want to introduce
     // an object that holds on to all of the supporting proof metadata, and can
     // expand that out to full proofs on demand.
-    const derivations: Derivation<TheoremId, PropertyId>[] = []
     this.traits.forEach((value: boolean, property: PropertyId) => {
       const proof = this.proof(property)
       if (!proof || proof === 'given') {
