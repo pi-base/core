@@ -136,7 +136,9 @@ class Derivations<TheoremId, PropertyId> {
     return this.evidence.get(property)
   }
 
-  all(): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
+  all(
+    traits: Map<PropertyId, boolean> = new Map()
+  ): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
     // We should now have enough information stored that we can populate this
     // list directly from `evidence` rather than relying on something external
     // populating `derivations`.
