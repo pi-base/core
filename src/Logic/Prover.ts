@@ -190,6 +190,7 @@ class Prover<
       derivations.push({ property, value, proof })
     })
 
+    // return { kind: 'derivations', derivations: this.derivations.all() }
     return { kind: 'derivations', derivations }
   }
 
