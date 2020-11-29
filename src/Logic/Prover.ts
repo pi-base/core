@@ -162,7 +162,7 @@ class Prover<
     traits: Map<PropertyId, boolean> = new Map()
   ) {
     this.traits = traits
-    this.derivations = new Derivations()
+    this.derivations = new Derivations([...traits.keys()])
     this.given = new Set([...traits.keys()])
     this.queue = new Queue(implications)
 
