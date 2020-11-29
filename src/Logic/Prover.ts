@@ -243,6 +243,8 @@ class Prover<
     return this.expand([theorem, properties])
   }
 
+  // This seems to be a concern of the Derivations class, and we'd really like
+  // to move it. We can't quite though, because of
   private expand([theorem, properties]: Evidence<TheoremId, PropertyId>): Proof<
     TheoremId,
     PropertyId
@@ -258,7 +260,7 @@ class Prover<
         continue
       }
 
-      if (this.given.has(property)) {
+      if (this.given.has(property)) { // <-- this reference to other state
         assumptions.add(property)
         expanded.add(property)
       } else {
