@@ -131,7 +131,7 @@ class Derivations<TheoremId, PropertyId> {
   }
 
   getEvidence(property: PropertyId): Evidence<TheoremId, PropertyId> | undefined {
-    return undefined
+    return this.evidence.get(property)
   }
 
   all(): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
