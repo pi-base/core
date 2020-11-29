@@ -141,6 +141,40 @@ class Derivations<TheoremId, PropertyId> {
       ([property, [value, proof]]) => ({ property, value, proof })
     )
   }
+
+  expand([theorem, properties]: Evidence<TheoremId, PropertyId>): Proof<
+    TheoremId,
+    PropertyId
+  > {
+    const theoremByProperty = new Map<PropertyId, TheoremId>()
+    const assumptions = new Set<PropertyId>()
+    const expanded = new Set<PropertyId>()
+
+    let queue = [...properties]
+    let property
+    while ((property = queue.shift())) {
+      if (expanded.has(property)) {
+        continue
+      }
+
+      if (this.given.has(property)) {
+        assumptions.add(property)
+        expanded.add(property)
+      } else {
+        const evidence = this.getEvidence(property)
+        if (evidence) {
+          theoremByProperty.set(property, evidence[0])
+          queue = queue.concat(evidence[1])
+          expanded.add(property)
+        }
+      }
+    }
+
+    return {
+      theorems: [theorem, ...theoremByProperty.values()],
+      properties: [...assumptions],
+    }
+  }
 }
 
 class Prover<
