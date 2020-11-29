@@ -154,6 +154,14 @@ class Derivations<TheoremId, PropertyId> {
     //     this.derivations.add({ property, value, proof })
     //   })
     const result: { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] = []
+    traits.forEach((value: boolean, property: PropertyId) => {
+      const proof = this.proof(property)
+      if (!proof || proof === 'given') {
+        return
+      }
+
+      result.push({ property, value, proof })
+    })
 
     return [...this.derivations.entries()].map(
       ([property, [value, proof]]) => ({ property, value, proof })
