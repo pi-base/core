@@ -111,9 +111,11 @@ export function proveTheorem<TheoremId = Id, PropertyId = Id>(
 
 class Derivations<TheoremId, PropertyId> {
   private derivations: Map<PropertyId, [boolean, Proof<TheoremId, PropertyId>]>
+  private evidence: Map<PropertyId, Evidence<TheoremId, PropertyId>>
 
   constructor() {
     this.derivations = new Map()
+    this.evidence = new Map()
   }
 
   add({ property, value, proof }: {
