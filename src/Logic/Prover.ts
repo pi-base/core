@@ -132,7 +132,7 @@ class Derivations<TheoremId, PropertyId> {
     this.evidence.set(property, [theorem, support])
   }
 
-  getEvidence(property: PropertyId): Evidence<TheoremId, PropertyId> | undefined {
+  private getEvidence(property: PropertyId): Evidence<TheoremId, PropertyId> | undefined {
     return this.evidence.get(property)
   }
 
