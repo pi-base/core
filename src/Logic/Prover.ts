@@ -125,7 +125,9 @@ class Derivations<TheoremId, PropertyId> {
   }
 
   all(): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
-    return []
+    return [...this.derivations.entries()].map(
+      ([property, [value, proof]]) => ({ property, value, proof })
+    )
   }
 }
 
