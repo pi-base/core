@@ -193,7 +193,6 @@ class Prover<
       }
 
       this.derivations.add({ property, value, proof })
-      derivations.push({ property, value, proof })
     })
 
     return { kind: 'derivations', derivations: this.derivations.all() }
