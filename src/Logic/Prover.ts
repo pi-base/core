@@ -10,14 +10,10 @@ import {
 import ImplicationIndex from './ImplicationIndex'
 import Queue from './Queue'
 import { Id, Implication } from './Types'
+import { Derivations, Proof } from './Derivations'
 
 // TODO: is it deduction, or derivation
 
-type Evidence<TheoremId = Id, PropertyId = Id> = [TheoremId, PropertyId[]]
-type Proof<TheoremId = Id, PropertyId = Id> = {
-  theorems: TheoremId[]
-  properties: PropertyId[]
-}
 export type Contradiction<TheoremId = Id, PropertyId = Id> = Proof<
   TheoremId,
   PropertyId
@@ -29,10 +25,10 @@ export type Derivation<TheoremId = Id, PropertyId = Id> = {
 }
 type Result<TheoremId = Id, PropertyId = Id> =
   | {
-      kind: 'contradiction'
-      contradiction: Contradiction<TheoremId, PropertyId>
-    }
-  | { kind: 'derivations'; derivations: Derivation<TheoremId, PropertyId>[] }
+    kind: 'contradiction'
+    contradiction: Contradiction<TheoremId, PropertyId>
+  }
+  | { kind: 'derivations'; derivations: Derivations<TheoremId, PropertyId> }
 
 // Given a collection of implications and a collection of traits for an object,
 // find either the collection of derivable traits, or a contradiction
@@ -116,11 +112,10 @@ class Prover<
     TheoremId,
     PropertyId
   >
-> {
+  > {
   private traits: Map<PropertyId, boolean>
+  private derivations: Derivations<TheoremId, PropertyId>
 
-  private given: Set<PropertyId>
-  private evidence: Map<PropertyId, Evidence<TheoremId, PropertyId>>
   private queue: Queue<TheoremId, PropertyId, Theorem>
 
   constructor(
@@ -128,8 +123,7 @@ class Prover<
     traits: Map<PropertyId, boolean> = new Map()
   ) {
     this.traits = traits
-    this.given = new Set([...traits.keys()])
-    this.evidence = new Map()
+    this.derivations = new Derivations([...traits.keys()])
     this.queue = new Queue(implications)
 
     traits.forEach((_: boolean, id: PropertyId) => {
@@ -146,28 +140,7 @@ class Prover<
       }
     }
 
-    const derivations: Derivation<TheoremId, PropertyId>[] = []
-    this.traits.forEach((value: boolean, property: PropertyId) => {
-      const proof = this.proof(property)
-      if (!proof || proof === 'given') {
-        return
-      }
-
-      derivations.push({ property, value, proof })
-    })
-
-    return { kind: 'derivations', derivations }
-  }
-
-  proof(
-    property: PropertyId
-  ): Proof<TheoremId, PropertyId> | 'given' | undefined {
-    if (this.given.has(property)) {
-      return 'given'
-    }
-
-    const evidence = this.evidence.get(property)
-    return evidence ? this.expand(evidence) : undefined
+    return { kind: 'derivations', derivations: this.derivations }
   }
 
   private apply(
@@ -194,41 +167,7 @@ class Prover<
     theorem: TheoremId,
     properties: PropertyId[]
   ): Contradiction<TheoremId, PropertyId> {
-    return this.expand([theorem, properties])
-  }
-
-  private expand([theorem, properties]: Evidence<TheoremId, PropertyId>): Proof<
-    TheoremId,
-    PropertyId
-  > {
-    const theoremByProperty = new Map<PropertyId, TheoremId>()
-    const assumptions = new Set<PropertyId>()
-    const expanded = new Set<PropertyId>()
-
-    let queue = [...properties]
-    let property
-    while ((property = queue.shift())) {
-      if (expanded.has(property)) {
-        continue
-      }
-
-      if (this.given.has(property)) {
-        assumptions.add(property)
-        expanded.add(property)
-      } else {
-        const evidence = this.evidence.get(property)
-        if (evidence) {
-          theoremByProperty.set(property, evidence[0])
-          queue = queue.concat(evidence[1])
-          expanded.add(property)
-        }
-      }
-    }
-
-    return {
-      theorems: [theorem, ...theoremByProperty.values()],
-      properties: [...assumptions],
-    }
+    return this.derivations.expand([theorem, properties])
   }
 
   force(
@@ -262,7 +201,7 @@ class Prover<
     }
 
     this.traits.set(property, formula.value)
-    this.evidence.set(property, [theorem, support])
+    this.derivations.addEvidence(property, formula.value, theorem, support)
     this.queue.mark(property)
   }
 
@@ -288,9 +227,9 @@ class Prover<
       (
         acc:
           | {
-              falses: Formula<PropertyId>[]
-              unknown: Formula<PropertyId> | undefined
-            }
+            falses: Formula<PropertyId>[]
+            unknown: Formula<PropertyId> | undefined
+          }
           | undefined,
         sf: Formula<PropertyId>
       ) => {
