@@ -109,8 +109,14 @@ export function proveTheorem<TheoremId = Id, PropertyId = Id>(
   }
 }
 
-class Derivations {
+class Derivations<TheoremId, PropertyId> {
+  add(_: {
+    property: PropertyId,
+    value: boolean,
+    proof: Proof<TheoremId, PropertyId>
+  }) {
 
+  }
 }
 
 class Prover<
@@ -122,7 +128,7 @@ class Prover<
   >
   > {
   private traits: Map<PropertyId, boolean>
-  private derivations: Derivations
+  private derivations: Derivations<TheoremId, PropertyId>
 
   private given: Set<PropertyId>
   private evidence: Map<PropertyId, Evidence<TheoremId, PropertyId>>
