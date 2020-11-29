@@ -117,7 +117,7 @@ class Derivations<TheoremId, PropertyId> {
   constructor(assumptions: PropertyId[] = []) {
     this.derivations = new Map()
     this.evidence = new Map()
-    this.given = new Set()
+    this.given = new Set(assumptions)
   }
 
   add({ property, value, proof }: {
