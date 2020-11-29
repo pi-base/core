@@ -109,6 +109,10 @@ export function proveTheorem<TheoremId = Id, PropertyId = Id>(
   }
 }
 
+class Derivations {
+
+}
+
 class Prover<
   TheoremId = Id,
   PropertyId = Id,
