@@ -214,7 +214,7 @@ class Prover<
       return 'given'
     }
 
-    const evidence = this.derivations.getEvidence(property) || this.evidence.get(property)
+    const evidence = this.derivations.getEvidence(property)
     return evidence ? this.expand(evidence) : undefined
   }
 
