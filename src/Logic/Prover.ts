@@ -252,17 +252,6 @@ class Prover<
     return { kind: 'derivations', derivations: this.derivations.all() }
   }
 
-  proof(
-    property: PropertyId
-  ): Proof<TheoremId, PropertyId> | 'given' | undefined {
-    if (this.given.has(property)) {
-      return 'given'
-    }
-
-    const evidence = this.derivations.getEvidence(property)
-    return evidence ? this.derivations.expand(evidence) : undefined
-  }
-
   private apply(
     implication: Theorem
   ): Contradiction<TheoremId, PropertyId> | undefined {
