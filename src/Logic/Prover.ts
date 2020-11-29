@@ -120,14 +120,6 @@ class Derivations<TheoremId, PropertyId> {
     this.given = new Set(assumptions)
   }
 
-  add({ property, value, proof }: {
-    property: PropertyId,
-    value: boolean,
-    proof: Proof<TheoremId, PropertyId>
-  }) {
-    this.derivations.set(property, [value, proof])
-  }
-
   addEvidence(property: PropertyId, theorem: TheoremId, support: PropertyId[]) {
     this.evidence.set(property, [theorem, support])
   }
