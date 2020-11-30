@@ -24,13 +24,12 @@ const render_ = (f: Formula<string>) => render(f, (p: string) => p)
 describe('Formula', () => {
   describe('structure', () => {
     it('has accessors', () => {
-      const f: any = compound
+      const f = compound
 
-      expect(f.subs[0].property).toEqual('compact')
-      expect(f.subs[0].value).toEqual(true)
-
-      expect(f.subs[1].subs[1].property).toEqual('separable')
-      expect(f.subs[1].subs[1].value).toEqual(false)
+      expect(f.subs[0]).toEqual(atom('compact'))
+      expect((f.subs[1] as F.Or<string>).subs[1]).toEqual(
+        atom('separable', false)
+      )
     })
   })
 

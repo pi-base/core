@@ -27,7 +27,7 @@ export function or<P>(...subs: Formula<P>[]): Or<P> {
   return { kind: 'or', subs: subs }
 }
 
-export function atom<P>(p: P, v: boolean = true): Atom<P> {
+export function atom<P>(p: P, v = true): Atom<P> {
   return { kind: 'atom', property: p, value: v }
 }
 
@@ -46,9 +46,9 @@ export function render<T>(f: Formula<T>, term: (t: T) => string): string {
       const name = term(f.property)
       return f.value ? name : '¬' + name
     case 'and':
-      return '(' + f.subs.map((sf) => render(sf!, term)).join(' ∧ ') + ')'
+      return '(' + f.subs.map((sf) => render(sf, term)).join(' ∧ ') + ')'
     case 'or':
-      return '(' + f.subs.map((sf) => render(sf!, term)).join(' ∨ ') + ')'
+      return '(' + f.subs.map((sf) => render(sf, term)).join(' ∨ ') + ')'
   }
 }
 
@@ -73,7 +73,7 @@ export function map<P, Q>(
     default:
       return {
         ...formula,
-        subs: formula.subs.map((sub) => map(func, sub!)),
+        subs: formula.subs.map((sub) => map(func, sub)),
       }
   }
 }
@@ -110,7 +110,7 @@ export function evaluate<T>(
         if (result === false) {
           return
         }
-        const sv = evaluate(sub!, traits)
+        const sv = evaluate(sub, traits)
         if (sv === false) {
           // definitely false
           result = false
@@ -126,7 +126,7 @@ export function evaluate<T>(
         if (result === true) {
           return
         }
-        const sv = evaluate(sub!, traits)
+        const sv = evaluate(sub, traits)
         if (sv === true) {
           // definitely true
           result = true
@@ -158,20 +158,26 @@ export function parse(q?: string): Formula<string> | undefined {
   return fromJSON(parsed)
 }
 
-export function fromJSON(json: any): Formula<string> {
-  if (json.and) {
+type Serialized =
+  | { and: Serialized[] }
+  | { or: Serialized[] }
+  | { property: string; value: boolean }
+  | Record<string, boolean>
+
+export function fromJSON(json: Serialized): Formula<string> {
+  if ('and' in json && typeof json.and === 'object') {
     return and<string>(...json.and.map(fromJSON))
-  } else if (json.or) {
+  } else if ('or' in json && typeof json.or === 'object') {
     return or<string>(...json.or.map(fromJSON))
-  } else if (json.property) {
+  } else if ('property' in json && typeof json.property === 'string') {
     return atom<string>(json.property, json.value)
   } else {
-    const property = Object.keys(json)[0]
-    return atom<string>(property, json[property])
+    const [property, value] = Object.entries(json)[0]
+    return atom<string>(property, value)
   }
 }
 
-export function toJSON(f: Formula<string>): object {
+export function toJSON(f: Formula<string>): Serialized {
   switch (f.kind) {
     case 'atom':
       return { [f.property]: f.value }

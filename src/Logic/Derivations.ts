@@ -29,7 +29,7 @@ export class Derivations<TheoremId = Id, PropertyId = Id> {
     value: boolean,
     theorem: TheoremId,
     support: PropertyId[]
-  ) {
+  ): void {
     this.evidence.set(property, [theorem, support])
     this.traits.set(property, value)
   }
