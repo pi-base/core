@@ -54,17 +54,17 @@ describe('deduceTraits', () => {
         {
           property: 'R',
           value: true,
-          proof: { properties: ['P'], theorems: [2, 1] },
+          proof: { properties: ['P'], theorems: [1, 2] },
         },
         {
           property: 'T',
           value: true,
-          proof: { properties: ['S', 'P'], theorems: [3, 2, 1] },
+          proof: { properties: ['S', 'P'], theorems: [1, 2, 3] },
         },
         {
           property: 'Y',
           value: false,
-          proof: { properties: ['X', 'S', 'P'], theorems: [4, 3, 2, 1] },
+          proof: { properties: ['X', 'S', 'P'], theorems: [1, 2, 3, 4] },
         },
       ])
     })
@@ -82,7 +82,7 @@ describe('proveTheorem', () => {
   it('can find a chained proof', () => {
     const proof = proveTheorem(theorems, atom('R'), atom('Q'))
 
-    expect(proof).toEqual([4, 3])
+    expect(proof).toEqual([3, 4])
   })
 
   it('can identify a tautology', () => {

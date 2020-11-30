@@ -28,13 +28,12 @@ it('can prove simple implications', () => {
     atom('P000003') // T2
   )
 
-  // TODO: flip
   expect(result).toEqual([
-    'T000032', // T2.5 => T2
-    'T000086', // Completely Hausdorff => T2.5
-    'T000114', // T3.5 => Completely Hausdorff
-    'T000113', // T4 => T3.5
     'T000112', // T5 => T4
+    'T000113', // T4 => T3.5
+    'T000114', // T3.5 => Completely Hausdorff
+    'T000086', // Completely Hausdorff => T2.5
+    'T000032', // T2.5 => T2
   ])
 })
 
@@ -49,8 +48,8 @@ it('can prove compound implications', () => {
   )
 
   expect(result).toEqual([
-    'T000044', // Discrete => Extemally Disconnected
-    'T000077', // Completely metrizable => Metrizable
     'T000085', // Discrete => Completely metrizable
+    'T000077', // Completely metrizable => Metrizable
+    'T000044', // Discrete => Extemally Disconnected
   ])
 })

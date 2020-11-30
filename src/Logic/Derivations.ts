@@ -81,7 +81,7 @@ export class Derivations<TheoremId = Id, PropertyId = Id> {
     }
 
     return {
-      theorems: [theorem, ...theoremByProperty.values()],
+      theorems: [theorem, ...theoremByProperty.values()].reverse(),
       properties: [...assumptions],
     }
   }
