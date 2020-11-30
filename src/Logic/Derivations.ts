@@ -60,7 +60,7 @@ export class Derivations<TheoremId, PropertyId> {
         assumptions.add(property)
         expanded.add(property)
       } else {
-        const evidence = this.getEvidence(property)
+        const evidence = this.evidence.get(property)
         if (evidence) {
           theoremByProperty.set(property, evidence[0])
           queue = queue.concat(evidence[1])
