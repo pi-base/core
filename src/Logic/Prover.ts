@@ -112,10 +112,12 @@ export function proveTheorem<TheoremId = Id, PropertyId = Id>(
 class Derivations<TheoremId, PropertyId> {
   private evidence: Map<PropertyId, Evidence<TheoremId, PropertyId>>
   private given: Set<PropertyId>
+  private traits: Map<PropertyId, boolean>
 
   constructor(assumptions: PropertyId[]) {
     this.evidence = new Map()
     this.given = new Set(assumptions)
+    this.traits = new Map()
   }
 
   addEvidence(property: PropertyId, value: boolean, theorem: TheoremId, support: PropertyId[]) {
