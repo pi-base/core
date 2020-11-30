@@ -32,7 +32,7 @@ type Result<TheoremId = Id, PropertyId = Id> =
     kind: 'contradiction'
     contradiction: Contradiction<TheoremId, PropertyId>
   }
-  | { kind: 'derivations'; derivations: Derivation<TheoremId, PropertyId>[] }
+  | { kind: 'derivations'; derivations: Derivations<TheoremId, PropertyId> }
 
 // Given a collection of implications and a collection of traits for an object,
 // find either the collection of derivable traits, or a contradiction
@@ -244,7 +244,7 @@ class Prover<
     //   return { kind: 'derivations', derivations: this.derviations }
     // The last blocker to doing that is the fact that `derivations` doesn't
     // encapsulate the `traits` that we're currently passing in.
-    return { kind: 'derivations', derivations: this.derivations.all() }
+    return { kind: 'derivations', derivations: this.derivations }
   }
 
   private apply(

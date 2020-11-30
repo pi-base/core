@@ -20,7 +20,7 @@ describe('deduceTraits', () => {
     if (result.kind === 'contradiction') {
       contradiction = result.contradiction
     } else {
-      deductions = result.derivations
+      deductions = result.derivations.all()
     }
   }
 
