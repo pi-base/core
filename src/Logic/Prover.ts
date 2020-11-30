@@ -122,6 +122,7 @@ class Derivations<TheoremId, PropertyId> {
 
   addEvidence(property: PropertyId, value: boolean, theorem: TheoremId, support: PropertyId[]) {
     this.evidence.set(property, [theorem, support])
+    this.traits.set(property, value)
   }
 
   private getEvidence(property: PropertyId): Evidence<TheoremId, PropertyId> | undefined {
