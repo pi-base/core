@@ -23,7 +23,7 @@ export function format(prefix: string, number: number): string {
 
 export function trim(id: string): string {
   const match = id.match(pattern)
-  return match?.groups ? match.groups.id : ''
+  return match?.groups ? match.groups.id : id
 }
 
 export function tag(input: string): Tagged | null {
