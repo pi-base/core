@@ -224,26 +224,6 @@ class Prover<
       }
     }
 
-    // Problem: we have recorded proofs of the form
-    //
-    //   Property P holds by theorem T and supporting properties [P1, P2, ...]
-    //
-    // where the supporting properties _may_ also be properties we've dervied,
-    // which have their own proofs. We're currently expanding those out to
-    // proofs "from first principles" of the form
-    //
-    //   ... by theorems [T1, T2, ...] and supporting properties [P1, P2, ...]
-    //
-    // where each supporting property is in our list of initial assumptions.
-    //
-    // Instead of always unconditionally expanding proofs, we want to introduce
-    // an object that holds on to all of the supporting proof metadata, and can
-    // expand that out to full proofs on demand.
-    //
-    // We want to eventually make the breaking API change
-    //   return { kind: 'derivations', derivations: this.derviations }
-    // The last blocker to doing that is the fact that `derivations` doesn't
-    // encapsulate the `traits` that we're currently passing in.
     return { kind: 'derivations', derivations: this.derivations }
   }
 
