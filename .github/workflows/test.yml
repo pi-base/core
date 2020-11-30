@@ -25,6 +25,8 @@ jobs:
         run: npm run lint:check
       - name: Formatting
         run: npm run fmt:check
+      - name: Build grammar
+        run: npm run prebuild
       - name: Test
         run: npm run test:cov
       - name: Report coverage
