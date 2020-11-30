@@ -35,11 +35,8 @@ export class Derivations<TheoremId = Id, PropertyId = Id> {
   }
 
   all(): Derivation<TheoremId, PropertyId>[] {
-    const result: {
-      property: PropertyId
-      value: boolean
-      proof: Proof<TheoremId, PropertyId>
-    }[] = []
+    const result: Derivation<TheoremId, PropertyId>[] = []
+
     this.traits.forEach((value: boolean, property: PropertyId) => {
       const proof = this.proof(property)
       if (!proof || proof === 'given') {
