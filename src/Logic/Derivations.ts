@@ -23,10 +23,6 @@ export class Derivations<TheoremId, PropertyId> {
     this.traits.set(property, value)
   }
 
-  private getEvidence(property: PropertyId): Evidence<TheoremId, PropertyId> | undefined {
-    return this.evidence.get(property)
-  }
-
   all(): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
     const result: { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] = []
     this.traits.forEach((value: boolean, property: PropertyId) => {
