@@ -129,9 +129,7 @@ class Derivations<TheoremId, PropertyId> {
     return this.evidence.get(property)
   }
 
-  all(
-    traits: Map<PropertyId, boolean> = new Map()
-  ): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
+  all(): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
     const result: { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] = []
     this.traits.forEach((value: boolean, property: PropertyId) => {
       const proof = this.proof(property)
