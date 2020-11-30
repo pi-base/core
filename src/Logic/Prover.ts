@@ -10,14 +10,10 @@ import {
 import ImplicationIndex from './ImplicationIndex'
 import Queue from './Queue'
 import { Id, Implication } from './Types'
+import { Derivations, Proof } from './Derivations'
 
 // TODO: is it deduction, or derivation
 
-type Evidence<TheoremId = Id, PropertyId = Id> = [TheoremId, PropertyId[]]
-type Proof<TheoremId = Id, PropertyId = Id> = {
-  theorems: TheoremId[]
-  properties: PropertyId[]
-}
 export type Contradiction<TheoremId = Id, PropertyId = Id> = Proof<
   TheoremId,
   PropertyId
@@ -106,86 +102,6 @@ export function proveTheorem<TheoremId = Id, PropertyId = Id>(
   result = prover.run()
   if (result.kind === 'contradiction') {
     return formatProof(result.contradiction)
-  }
-}
-
-class Derivations<TheoremId, PropertyId> {
-  private evidence: Map<PropertyId, Evidence<TheoremId, PropertyId>>
-  private given: Set<PropertyId>
-  private traits: Map<PropertyId, boolean>
-
-  constructor(assumptions: PropertyId[]) {
-    this.evidence = new Map()
-    this.given = new Set(assumptions)
-    this.traits = new Map()
-  }
-
-  addEvidence(property: PropertyId, value: boolean, theorem: TheoremId, support: PropertyId[]) {
-    this.evidence.set(property, [theorem, support])
-    this.traits.set(property, value)
-  }
-
-  private getEvidence(property: PropertyId): Evidence<TheoremId, PropertyId> | undefined {
-    return this.evidence.get(property)
-  }
-
-  all(): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
-    const result: { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] = []
-    this.traits.forEach((value: boolean, property: PropertyId) => {
-      const proof = this.proof(property)
-      if (!proof || proof === 'given') {
-        return
-      }
-
-      result.push({ property, value, proof })
-    })
-
-    return result
-  }
-
-  expand([theorem, properties]: Evidence<TheoremId, PropertyId>): Proof<
-    TheoremId,
-    PropertyId
-  > {
-    const theoremByProperty = new Map<PropertyId, TheoremId>()
-    const assumptions = new Set<PropertyId>()
-    const expanded = new Set<PropertyId>()
-
-    let queue = [...properties]
-    let property
-    while ((property = queue.shift())) {
-      if (expanded.has(property)) {
-        continue
-      }
-
-      if (this.given.has(property)) {
-        assumptions.add(property)
-        expanded.add(property)
-      } else {
-        const evidence = this.getEvidence(property)
-        if (evidence) {
-          theoremByProperty.set(property, evidence[0])
-          queue = queue.concat(evidence[1])
-          expanded.add(property)
-        }
-      }
-    }
-
-    return {
-      theorems: [theorem, ...theoremByProperty.values()],
-      properties: [...assumptions],
-    }
-  }
-
-  proof(
-    property: PropertyId
-  ): Proof<TheoremId, PropertyId> | 'given' | undefined {
-    if (this.given.has(property)) {
-      return 'given'
-    }
-
-    const evidence = this.getEvidence(property)
-    return evidence ? this.expand(evidence) : undefined
   }
 }
 
