@@ -133,7 +133,7 @@ class Derivations<TheoremId, PropertyId> {
     traits: Map<PropertyId, boolean> = new Map()
   ): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
     const result: { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] = []
-    traits.forEach((value: boolean, property: PropertyId) => {
+    this.traits.forEach((value: boolean, property: PropertyId) => {
       const proof = this.proof(property)
       if (!proof || proof === 'given') {
         return
