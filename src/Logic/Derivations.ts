@@ -2,29 +2,44 @@ import { Id } from './Types'
 
 type Evidence<TheoremId = Id, PropertyId = Id> = [TheoremId, PropertyId[]]
 
+export type Derivation<TheoremId = Id, PropertyId = Id> = {
+  property: PropertyId
+  value: boolean
+  proof: Proof<TheoremId, PropertyId>
+}
+
 export type Proof<TheoremId = Id, PropertyId = Id> = {
   theorems: TheoremId[]
   properties: PropertyId[]
 }
 
-export class Derivations<TheoremId, PropertyId> {
+export class Derivations<TheoremId = Id, PropertyId = Id> {
   private evidence: Map<PropertyId, Evidence<TheoremId, PropertyId>>
   private given: Set<PropertyId>
   private traits: Map<PropertyId, boolean>
 
-  constructor(assumptions: PropertyId[]) {
+  constructor(assumptions: PropertyId[] = []) {
     this.evidence = new Map()
     this.given = new Set(assumptions)
     this.traits = new Map()
   }
 
-  addEvidence(property: PropertyId, value: boolean, theorem: TheoremId, support: PropertyId[]) {
+  addEvidence(
+    property: PropertyId,
+    value: boolean,
+    theorem: TheoremId,
+    support: PropertyId[]
+  ) {
     this.evidence.set(property, [theorem, support])
     this.traits.set(property, value)
   }
 
-  all(): { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] {
-    const result: { property: PropertyId, value: boolean, proof: Proof<TheoremId, PropertyId> }[] = []
+  all(): Derivation<TheoremId, PropertyId>[] {
+    const result: {
+      property: PropertyId
+      value: boolean
+      proof: Proof<TheoremId, PropertyId>
+    }[] = []
     this.traits.forEach((value: boolean, property: PropertyId) => {
       const proof = this.proof(property)
       if (!proof || proof === 'given') {

@@ -1,15 +1,15 @@
-import { and, atom, or } from '../Formula'
-import { Contradiction, Derivation, deduceTraits, proveTheorem } from './Prover'
-import ImplicationIndex from './ImplicationIndex'
-import { index, recordToMap } from '../__test__'
+import { and, atom, or } from './Formula'
+import { Contradiction, Derivations, deduceTraits, proveTheorem } from './Logic'
+import ImplicationIndex from './Logic/ImplicationIndex'
+import { index, recordToMap } from './__test__'
 
 describe('deduceTraits', () => {
   let contradiction: Contradiction<number> | undefined
-  let deductions: Derivation<number>[]
+  let deductions: Derivations<number>
 
   beforeEach(() => {
     contradiction = undefined
-    deductions = []
+    deductions = new Derivations()
   })
 
   function run(
@@ -20,7 +20,7 @@ describe('deduceTraits', () => {
     if (result.kind === 'contradiction') {
       contradiction = result.contradiction
     } else {
-      deductions = result.derivations.all()
+      deductions = result.derivations
     }
   }
 
@@ -45,7 +45,7 @@ describe('deduceTraits', () => {
     })
 
     it('proves the expected traits', () => {
-      expect(deductions).toEqual([
+      expect(deductions.all()).toEqual([
         {
           property: 'Q',
           value: true,
