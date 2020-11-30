@@ -246,7 +246,7 @@ class Prover<
     //   return { kind: 'derivations', derivations: this.derviations }
     // The last blocker to doing that is the fact that `derivations` doesn't
     // encapsulate the `traits` that we're currently passing in.
-    return { kind: 'derivations', derivations: this.derivations.all(this.traits) }
+    return { kind: 'derivations', derivations: this.derivations.all() }
   }
 
   private apply(
