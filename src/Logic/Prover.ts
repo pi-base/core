@@ -238,6 +238,11 @@ class Prover<
     // Instead of always unconditionally expanding proofs, we want to introduce
     // an object that holds on to all of the supporting proof metadata, and can
     // expand that out to full proofs on demand.
+    //
+    // We want to eventually make the breaking API change
+    //   return { kind: 'derivations', derivations: this.derviations }
+    // The last blocker to doing that is the fact that `derivations` doesn't
+    // encapsulate the `traits` that we're currently passing in.
     return { kind: 'derivations', derivations: this.derivations.all(this.traits) }
   }
 
