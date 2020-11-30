@@ -118,7 +118,7 @@ class Derivations<TheoremId, PropertyId> {
     this.given = new Set(assumptions)
   }
 
-  addEvidence(property: PropertyId, theorem: TheoremId, support: PropertyId[]) {
+  addEvidence(property: PropertyId, value: boolean, theorem: TheoremId, support: PropertyId[]) {
     this.evidence.set(property, [theorem, support])
   }
 
@@ -304,7 +304,7 @@ class Prover<
     }
 
     this.traits.set(property, formula.value)
-    this.derivations.addEvidence(property, theorem, support)
+    this.derivations.addEvidence(property, formula.value, theorem, support)
     this.queue.mark(property)
   }
 
