@@ -58,7 +58,7 @@ export function bundleUrl({ branch, host = defaultHost }: FetchOpts): string {
 }
 
 export async function fetch(
-  opts: FetchOpts
+  opts: FetchOpts,
 ): Promise<{ bundle: Bundle; etag: string } | undefined> {
   const headers = new Headers()
   if (opts.etag) {
@@ -72,6 +72,8 @@ export async function fetch(
     return
   }
 
+  // TODO: use a schema definition to handle validation failures
+  // eslint-disable-next-line
   const json = await response.json()
   const deserialized = deserialize(json)
 

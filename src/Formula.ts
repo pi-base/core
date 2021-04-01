@@ -1,4 +1,7 @@
-import { parse as _parse } from './Formula/Grammar'
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { parse as _parse } from './Formula/Grammar.pegjs'
+
 import { union } from './Util'
 
 export interface Atom<P> {
@@ -43,6 +46,7 @@ export function properties<P>(f: Formula<P>): Set<P> {
 export function render<T>(f: Formula<T>, term: (t: T) => string): string {
   switch (f.kind) {
     case 'atom':
+      // eslint-disable-next-line no-case-declarations
       const name = term(f.property)
       return f.value ? name : '¬' + name
     case 'and':
@@ -65,7 +69,7 @@ export function negate<P>(formula: Formula<P>): Formula<P> {
 
 export function map<P, Q>(
   func: (p: Atom<P>) => Atom<Q>,
-  formula: Formula<P>
+  formula: Formula<P>,
 ): Formula<Q> {
   switch (formula.kind) {
     case 'atom':
@@ -80,7 +84,7 @@ export function map<P, Q>(
 
 export function mapProperty<P, Q>(
   func: (p: P) => Q,
-  formula: Formula<P>
+  formula: Formula<P>,
 ): Formula<Q> {
   function mapAtom(a: Atom<P>): Atom<Q> {
     return { ...a, property: func(a.property) }
@@ -94,7 +98,7 @@ export function compact<P>(f: Formula<P | undefined>): Formula<P> | undefined {
 
 export function evaluate<T>(
   f: Formula<T>,
-  traits: Map<T, boolean>
+  traits: Map<T, boolean>,
 ): boolean | undefined {
   let result: boolean | undefined
 
@@ -146,6 +150,7 @@ export function parse(q?: string): Formula<string> | undefined {
 
   let parsed
   try {
+    // eslint-disable-next-line
     parsed = _parse(q)
   } catch {
     if (q && q.startsWith('(')) {
@@ -171,10 +176,18 @@ export function fromJSON(json: Serialized): Formula<string> {
     return or<string>(...json.or.map(fromJSON))
   } else if ('property' in json && typeof json.property === 'string') {
     return atom<string>(json.property, json.value)
-  } else {
-    const [property, value] = Object.entries(json)[0]
-    return atom<string>(property, value)
   }
+
+  const entries = Object.entries(json)
+  if (entries.length !== 1) {
+    throw `cannot cast object with ${entries.length} keys to atom`
+  }
+
+  if (typeof entries[0][1] !== 'boolean') {
+    throw `cannot cast object with non-boolean value`
+  }
+
+  return atom<string>(...entries[0])
 }
 
 export function toJSON(f: Formula<string>): Serialized {

@@ -1,12 +1,10 @@
+const config = require('@pi-base/dev').jestConfig
+
 module.exports = {
-  clearMocks: true,
-  moduleFileExtensions: ['js', 'ts'],
-  roots: ['src'],
-  testEnvironment: 'node',
-  testMatch: ['**/*.test.ts'],
-  testRunner: 'jest-circus/runner',
-  transform: {
-    '^.+\\.ts$': 'ts-jest'
-  },
-  verbose: true
+  ...config,
+  bail: 10,
+  transform: Object.assign(config.transform, {
+    '^.+\\.pegjs$': 'pegjs-jest',
+  }),
+  verbose: true,
 }

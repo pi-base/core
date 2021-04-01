@@ -19,16 +19,16 @@ export class Derivations<TheoremId = Id, PropertyId = Id> {
   private traits: Map<PropertyId, boolean>
 
   constructor(assumptions: PropertyId[] = []) {
-    this.evidence = new Map()
     this.given = new Set(assumptions)
-    this.traits = new Map()
+    this.evidence = new Map<PropertyId, Evidence<TheoremId, PropertyId>>()
+    this.traits = new Map<PropertyId, boolean>()
   }
 
   addEvidence(
     property: PropertyId,
     value: boolean,
     theorem: TheoremId,
-    support: PropertyId[]
+    support: PropertyId[],
   ): void {
     this.evidence.set(property, [theorem, support])
     this.traits.set(property, value)
@@ -84,7 +84,7 @@ export class Derivations<TheoremId = Id, PropertyId = Id> {
   }
 
   proof(
-    property: PropertyId
+    property: PropertyId,
   ): Proof<TheoremId, PropertyId> | 'given' | undefined {
     if (this.given.has(property)) {
       return 'given'

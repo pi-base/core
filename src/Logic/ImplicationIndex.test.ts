@@ -4,11 +4,11 @@ import { index } from '../__test__'
 describe('ImplicationIndex', () => {
   const theorems = index(
     [atom('A'), atom('B')],
-    [atom('B'), or(atom('C'), atom('D'))]
+    [atom('B'), or(atom('C'), atom('D'))],
   )
 
   it('can return all items', () => {
-    expect(theorems.all.length).toEqual(2)
+    expect(theorems.all).toHaveLength(2)
   })
 
   describe('withProperty', () => {
